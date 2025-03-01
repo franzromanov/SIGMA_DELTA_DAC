@@ -1,4 +1,4 @@
-module PARTS_3(
+module PART_3(
 	input clck,rst,
 	input signed [3:0]x,
 	output reg signed [3:0]y_out
