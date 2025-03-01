@@ -1,4 +1,4 @@
-module SIGMA_BOY(
+module PARTS_y_out<=x_1+x_1-x_2(
 	input clck,rst,
 	input signed [3:0]x,
 	output reg signed [3:0]y_out
