@@ -2,9 +2,9 @@
 
 module tb_TRUNCATOR_3;
 	reg clck,rst;
-	reg signed [2:0] y_out;
+	wire signed [2:0] y_out;
 	reg signed [15:0] x_in;
-	reg signed [12:0] e_out;
+	wire signed [12:0] e_out;
 
 
 TRUNCATOR_3 uut (
