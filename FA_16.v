@@ -24,7 +24,7 @@ module FA_16 (clck, a, b, s_cin, cout, sum);
     FA FA12 (.a(a[12]), .b(b[12]), .cin(cin[11]), .cout(cin[12]), .sum(sum_comb[12]));
     FA FA13 (.a(a[13]), .b(b[13]), .cin(cin[12]), .cout(cin[13]), .sum(sum_comb[13]));
     FA FA14 (.a(a[14]), .b(b[14]), .cin(cin[13]), .cout(cin[14]), .sum(sum_comb[14]));
-    FA FA15 (.a(a[15]), .b(b[15]), .cin(cin[14]), .cout(cout_comb), .sum(sum_comb[15]);
+    FA FA15 (.a(a[15]), .b(b[15]), .cin(cin[14]), .cout(cout_comb), .sum(sum_comb[15]));
 
 
 
