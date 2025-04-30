@@ -12,7 +12,7 @@ module FA_16 (clck, a, b, s_cin, cout, sum);
     FA FA0 (.a(a[0]), .b(b[0]), .cin(s_cin), .cout(cin[0]), .sum(sum_comb[0]));
     FA FA1 (.a(a[1]), .b(b[1]), .cin(cin[0]), .cout(cin[1]), .sum(sum_comb[1]));
     FA FA2 (.a(a[2]), .b(b[2]), .cin(cin[1]), .cout(cin[2]), .sum(sum_comb[2]));
-    FA FA3 (.a(a[3]), .b(b[3]), .cin(cin[2]), .cout(cout_comb), .sum(sum_comb[3]));
+    FA FA3 (.a(a[3]), .b(b[3]), .cin(cin[2]), .cout(cin[3]), .sum(sum_comb[3]));
     FA FA4 (.a(a[4]), .b(b[4]), .cin(cin[3]), .cout(cin[4]), .sum(sum_comb[4]));
     FA FA5 (.a(a[5]), .b(b[5]), .cin(cin[4]), .cout(cin[5]), .sum(sum_comb[5]));
     FA FA6 (.a(a[6]), .b(b[6]), .cin(cin[5]), .cout(cin[6]), .sum(sum_comb[6]));
