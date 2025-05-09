@@ -8,16 +8,28 @@ module TRUNCATOR_1(
 
     reg signed [4:0] x_in_err;         // Intermediate value: 4-bit input + 3-bit error = 5-bit
 
+
+	 always@(*)begin
+	 
+		 if(rst==1)begin
+			 x_in_err=5'sd0;
+			 y_out=0;
+		 end else begin
+			 x_in_err = x_in+e_out;
+			 y_out = x_in_err[4];
+		 end
+
+	 end
+    
     always @(posedge clck or posedge rst) begin
-        if (rst) begin
-            x_in_err <= 5'd0;
-            e_out <= 3'd0;
-            y_out <= 1'd0;
-        end else begin
-            x_in_err <= x_in + e_out;
-            y_out <= x_in_err[4];       // MSB is the truncated output
-            e_out <= x_in_err[3:1];     // LSBs saved as error for feedback
-        end
+			
+         if (rst) begin
+            e_out    <= 3'sd0;
+
+		 end else if(clck) begin
+				e_out    <=x_in_err[3:1];
+         end
+        
     end
 
 endmodule
