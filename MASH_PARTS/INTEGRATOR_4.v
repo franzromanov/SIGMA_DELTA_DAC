@@ -1,5 +1,5 @@
 module INTEGRATOR_4 (input wire clk,input wire reset,
-	input wire [3:0] in,	output reg [3:0] out);
+		     input wire signed [3:0] in,	output reg signed [3:0] out);
 
 	always @(posedge clk) begin
     	if (reset) begin
