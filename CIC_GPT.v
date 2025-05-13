@@ -1,7 +1,7 @@
 module CIC #(
     parameter BIT_WIDTH        = 4,                 // Input/output width (4-bit)
     parameter STAGES           = 3,                 // Number of CIC stages
-    parameter INTERP_RATE      = 4,                // Interpolation (upsample) rate
+    parameter INTERP_RATE      = 8,                // Interpolation (upsample) rate
     parameter INT_WIDTH        = BIT_WIDTH + STAGES*$clog2(INTERP_RATE),  // Internal precision
     parameter OUT_SCALE_SHIFT  = 6                  // Output scaling shift for proper amplitude
 )(
