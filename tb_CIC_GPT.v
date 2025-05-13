@@ -1,7 +1,7 @@
 module tb_CIC;
     parameter BIT_WIDTH    = 4;
     parameter STAGES       = 3;
-    parameter INTERP_RATE  = 4;
+    parameter INTERP_RATE  = 8;
     parameter CLK_PERIOD   = 10;
     parameter SIM_LENGTH   = 1000;
     parameter OUT_SCALE    = 6;
@@ -31,19 +31,14 @@ module tb_CIC;
     // Clock generation
     always #(CLK_PERIOD/2) clk = ~clk;
 
+    // Unit step input function
     function signed [BIT_WIDTH-1:0] get_input_sample;
         input integer sample_num;
         begin
-            case (sample_num % 8)
-                0: get_input_sample = 0;
-                1: get_input_sample = 1;
-                2: get_input_sample = 1;
-                3: get_input_sample = 1;
-                4: get_input_sample = 0;
-                5: get_input_sample = -1;
-                6: get_input_sample = -1;
-                7: get_input_sample = -1;
-            endcase
+            if (sample_num < 4)
+                get_input_sample = 0;
+            else
+                get_input_sample = 1;
         end
     endfunction
 
