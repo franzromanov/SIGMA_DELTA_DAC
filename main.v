@@ -1,4 +1,4 @@
-module main(clck,rst)
+module main(clck,rst,out_debug_1,out_debug_2);
 	
 	input clck,rst;
 	wire [3:0]SIG_IN, CIC_OUT,PART_1_OUT,PART_2_OUT,PART_3_OUT,TRUNCATOR_1_OUT,TRUNCATOR_3_OUT,OUT_1,OUT_2,OUT_3,OUT_4,OUT_5;
@@ -7,7 +7,8 @@ module main(clck,rst)
    parameter STAGES       = 3;
    parameter INTERP_RATE  = 8;
    parameter OUT_SCALE    = 6;
-
+	output  out_debug_1;
+	output [6:0]  out_debug_2;
 	
 	SIGNAL _SIGNAL(
 		.clck(clck),
@@ -26,7 +27,7 @@ module main(clck,rst)
       .enable(1),
       .data_in(SIG_IN),
       .data_out(CIC_OUT),
-      .data_valid(1)
+      .data_valid()
    );
 
 	PART_1 _PART_1(
@@ -66,7 +67,7 @@ module main(clck,rst)
 	
 	);
 	
-	DECODER_3 _DECODER_3(
+	DECODER _DECODER_3(
 		.clck(clck),
 		.rst(rst),
 		.A(TRUNCATOR_3_OUT[2]),
@@ -81,10 +82,12 @@ module main(clck,rst)
 		.x7(OUT_DECODER[6])
 	);
 	
+	/*
+	
 	DECODER_SIGN _DECODER_SIGN(
 	
 	);
-	
+	*/
 
 	sum_point1 sum_1(
 
@@ -94,7 +97,7 @@ module main(clck,rst)
 
 	);
 
-	sum_point1 sum_2(
+	sum_point2 sum_2(
 
 		.sum_point1_out(OUT_1),
 		.truncator_1_out(TRUNCATOR_1_OUT),
@@ -102,7 +105,7 @@ module main(clck,rst)
 
 	);
 
-	sum_point1 sum_4(
+	sum_point4 sum_4(
 
 		.sum_point2_out(OUT_2),
 		.PART_3_out(PART_3_OUT),
@@ -111,12 +114,15 @@ module main(clck,rst)
 	);
 
 
-	sum_point1 sum_5(
+	sum_point5 sum_5(
 
 		.sum_point4_out(OUT_4),
 		.Truncator_3_out(TRUNCATOR_3_OUT),
 		.sum_point5_out(OUT_5)
 
 	);
+	
+	assign out_debug_1=TRUNCATOR_1_OUT;
+	assign out_debug_2=PART_2_OUT;
 
 endmodule
