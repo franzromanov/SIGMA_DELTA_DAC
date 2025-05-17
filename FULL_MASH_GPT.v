@@ -1,102 +1,77 @@
-module SIGMA_BOY (
-    input [15:0] x1,
+module sigma_delta_dac (
     input clk,
-    output [15:0] y
+    input rst,
+    input [3:0] x1,
+    output y
 );
 
-    // PART_1: First Stage Modulator (1-bit DAC + Integrator)
-    wire [15:0] int1_out, dac1_out, trunc1_out;
-    wire cout1;
+    // Internal signals
+    reg signed [4:0] x2, x3;
+    reg signed [3:0] y1;
+    reg signed [3:0] y2;
+    reg signed [4:0] e1;
+    reg signed [4:0] integrator1;
+    reg signed [4:0] feedback_poly_out;
+    reg signed [3:0] x1_delayed;
+    reg signed [4:0] z1, z2;
+    reg signed [4:0] z1_delayed, z2_delayed;
+    reg signed [2:0] m_trunc;
+    reg signed [3:0] m_dac_out;
 
-    // Integrator 1: Accumulate input x1 with feedback from 1-bit DAC
-    FA_16 integrator1 (
-        .clck(clk),
-        .a(x1),
-        .b(~dac1_out),
-        .s_cin(1'b1),
-        .cout(cout1),
-        .sum(int1_out)
-    );
+    reg signed [4:0] temp_sum;  // Added intermediate register
 
-    // Truncator (1-bit output)
-    assign trunc1_out = {15'b0, int1_out[15]}; // LSB truncation
+    // Delays
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            x1_delayed <= 0;
+            z1 <= 0;
+            z2 <= 0;
+            z1_delayed <= 0;
+            z2_delayed <= 0;
+            integrator1 <= 0;
+        end else begin
+            x1_delayed <= x1;
+            z1 <= x2;
+            z2 <= integrator1;
+            z1_delayed <= z1;
+            z2_delayed <= z2;
+        end
+    end
 
-    // 1-bit DAC (decoder)
-    wire dac1_bit;
-    assign dac1_bit = trunc1_out[0];
-    assign dac1_out = {16{dac1_bit}}; // Output full scale if 1
+    // Computation
+    always @(*) begin
+        x2 = x1 + z1;
+        x3 = {x2[4], 4'b0000};  // 1-bit truncator (MSB)
 
-    // PART_2: Second Stage Modulator (3-bit DAC + Integrator)
-    wire [15:0] error_stage2, error_stage2_delay, diff_stage2, int2_out, trunc2_out, dac2_out;
-    wire cout2;
+        // 1-bit DAC
+        if (x3[4] == 1'b1)
+            y1 = -8;
+        else
+            y1 = 7;
 
-    // Calculate error: x1 - dac1_out
-    FA_16 error_calc (
-        .clck(clk),
-        .a(x1),
-        .b(~dac1_out),
-        .s_cin(1'b1),
-        .cout(),
-        .sum(error_stage2)
-    );
+        y2 = y1 - z1_delayed[3:0];
+        e1 = x2 - x3;
 
-    // Apply (1 - z⁻¹) to the error signal before integration
-    reg [15:0] error_stage2_reg;
-    always @(posedge clk)
-        error_stage2_reg <= error_stage2;
+        integrator1 = e1 + z2;
+        feedback_poly_out = (z1 <<< 1) - z2;
 
-    wire [15:0] stage2_input;
-    FA_16 diff_calc (
-        .clck(clk),
-        .a(error_stage2),
-        .b(~error_stage2_reg),
-        .s_cin(1'b1),
-        .cout(),
-        .sum(stage2_input)
-    );
+        // Avoid inline bit slicing: use temp_sum
+        temp_sum = integrator1 + feedback_poly_out;
+        m_trunc = temp_sum[4:2];  // extract bits separately
 
-    // Integrator 2
-    FA_16 integrator2 (
-        .clck(clk),
-        .a(stage2_input),
-        .b(16'b0),
-        .s_cin(1'b0),
-        .cout(cout2),
-        .sum(int2_out)
-    );
+        case (m_trunc)
+            3'b000: m_dac_out = -4;
+            3'b001: m_dac_out = -3;
+            3'b010: m_dac_out = -2;
+            3'b011: m_dac_out = -1;
+            3'b100: m_dac_out = 1;
+            3'b101: m_dac_out = 2;
+            3'b110: m_dac_out = 3;
+            3'b111: m_dac_out = 4;
+            default: m_dac_out = 0;
+        endcase
+    end
 
-    // Truncator (3-bit output, using MSBs)
-    wire [2:0] trunc2_bits;
-    assign trunc2_bits = int2_out[15:13];
-
-    // 3-bit DAC (decoder)
-    wire [6:0] decoder_out;
-    DECODER_3 dac3bit (
-        .A(trunc2_bits[2]),
-        .B(trunc2_bits[1]),
-        .C(trunc2_bits[0]),
-        .x1(decoder_out[0]),
-        .x2(decoder_out[1]),
-        .x3(decoder_out[2]),
-        .x4(decoder_out[3]),
-        .x5(decoder_out[4]),
-        .x6(decoder_out[5]),
-        .x7(decoder_out[6])
-    );
-    assign dac2_out = {9'b0, decoder_out[6:0]};
-
-    // PART_3: Noise Shaping Output (apply 1 - z⁻¹ to int2_out - dac2_out)
-    wire [15:0] stage3_diff, stage3_diff_delay, y2;
-    assign stage3_diff = int2_out - dac2_out;
-
-    reg [15:0] stage3_diff_reg;
-    always @(posedge clk)
-        stage3_diff_reg <= stage3_diff;
-
-    assign y2 = stage3_diff - stage3_diff_reg;
-
-    wire [15:0] y1;
-    assign y1 = trunc1_out;
-    assign y = y1 + y2;
+    assign y = y1[3];  // MSB of 1-bit DAC output
 
 endmodule
